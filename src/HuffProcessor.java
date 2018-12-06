@@ -1,4 +1,5 @@
 
+import java.util.*;
 /**
  * Although this class has a history of several years,
  * it is starting from a blank-slate, new and clean implementation
@@ -53,13 +54,81 @@ public class HuffProcessor {
 //			if (val == -1) break;
 //			out.writeBits(BITS_PER_WORD, val);
 //		}
+		out.writeBits(BITS_PER_INT, HUFF_TREE);
+		writeHeader(root,out);
+		
+		in.reset();
+		writeCompressedBits(codings,in,out);
 		out.close();
 	}
-	private HuffNode makeTreeFromCounts(int[] counts) {
-		// TODO Auto-generated method stub
-		return null;
+	private void writeCompressedBits(String[] codings, BitInputStream in, BitOutputStream out) {
+		
+		//how to deal with PSEUDO_EOF
+		
+		for(int i = 0; i <codings.length; i++) {
+			int x = in.readBits(BITS_PER_WORD);
+			String code = codings[x];
+			out.writeBits(code.length(), Integer.parseInt(code, 2));
+		}
+		
 	}
 
+	private void writeHeader(HuffNode root, BitOutputStream out) {
+		
+		if(root.myWeight == 0) {
+			 out.writeBits(1,0);
+			 writeHeader(root.myLeft, out);
+			 writeHeader(root.myRight, out);
+		}
+	
+		else {
+			out.writeBits(1, 1);
+			out.writeBits(BITS_PER_WORD + 1, root.myValue);
+		}
+		
+		
+	}
+
+	private String[] makeCodingsFromTree(HuffNode root) {
+		String[]encodings = new String[ALPH_SIZE + 1];
+		codingHelper(root,"", encodings);
+		
+		return encodings;
+	}
+
+	private void codingHelper(HuffNode root, String path, String[] encodings) {
+		
+		if(root.myWeight==1) {
+			encodings[root.myValue] = path;
+			return;
+		}
+		else {
+			path += "0";
+			codingHelper(root.myLeft, path, encodings);
+			path += "1";
+			codingHelper(root.myRight,path, encodings);	
+		}
+		
+	}
+
+	private HuffNode makeTreeFromCounts(int[] counts) { //make sure PSEUDO_EOF in tree***x
+		PriorityQueue<HuffNode> pq = new PriorityQueue<>();
+		for(int x = 0; x < counts.length; x++) {
+			if(counts[x] > 0) {
+				pq.add(new HuffNode(x, counts[x], null, null));
+			}
+		}
+		while(pq.size() > 1) {
+			HuffNode left = pq.remove();
+			HuffNode right = pq.remove();
+			HuffNode t = new HuffNode(right.myValue + 1, left.myWeight+right.myWeight, left, right);
+			pq.add(t);
+		}
+		HuffNode root = pq.remove();
+		return root;
+	}
+	
+	//will=goat
 	private int[] readForCounts(BitInputStream in) {
 		int[] freq = new int[ALPH_SIZE + 1];
 		int first = in.readBits(BITS_PER_WORD);
