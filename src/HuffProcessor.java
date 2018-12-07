@@ -109,6 +109,9 @@ public class HuffProcessor {
 		
 		if(root.myLeft == null && root.myRight == null) {
 			encodings[root.myValue] = path;
+			if(myDebugLevel >= DEBUG_HIGH) {
+				System.out.printf("encoding for %d is %s\n", root.myValue, path);
+			}
 			return;
 		}
 		else {
@@ -127,6 +130,9 @@ public class HuffProcessor {
 			//counts used as order in priority queue, smallest counts huff nodes removed first
 		}
 		while(pq.size() > 1) { 
+			if(myDebugLevel >= DEBUG_HIGH) {
+				System.out.printf("pq created with % nodes\n", pq.size());
+			}
 			HuffNode left = pq.remove();
 			HuffNode right = pq.remove();
 			HuffNode t = new HuffNode(0, left.myWeight+right.myWeight, left, right);
