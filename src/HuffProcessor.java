@@ -48,12 +48,7 @@ public class HuffProcessor {
 		int[] counts = readForCounts(in);
 		HuffNode root = makeTreeFromCounts(counts);
 		String[] codings = makeCodingsFromTree(root);
-
-//		while (true){
-//			int val = in.readBits(BITS_PER_WORD);
-//			if (val == -1) break;
-//			out.writeBits(BITS_PER_WORD, val);
-//		}
+		
 		out.writeBits(BITS_PER_INT, HUFF_TREE);
 		writeHeader(root,out);
 		
@@ -181,7 +176,7 @@ public class HuffProcessor {
 		
 		while(true) {
 			if(current == null) {
-				
+				return;
 			}
 			int bits = in.readBits(1);
 			if(bits == -1) {
@@ -192,7 +187,7 @@ public class HuffProcessor {
 				if(bits == 0) current = current.myLeft;
 				else current = current.myRight;
 				
-				if(current.myWeight == 1) { // checks if current is a leaf node
+				if(current!= null && current.myWeight == 1) { // checks if current is a leaf node
 					if(current.myValue == PSEUDO_EOF) { 
 						break;	
 					}
