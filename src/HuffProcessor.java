@@ -65,16 +65,20 @@ public class HuffProcessor {
 		
 		//translation goes through in and turns to out, using codings, in 8-bit chunks (for one character)
 		//how to deal with PSEUDO_EOF
-		
-		for(int i = 0; i <codings.length; i++) {
-			int x = in.readBits(BITS_PER_WORD);
+		int x = in.readBits(BITS_PER_WORD);
+		while(x != -1) {
 			String code = codings[x];
 			out.writeBits(code.length(), Integer.parseInt(code, 2));
+			in.readBits(BITS_PER_WORD);
 		}
 		
 	}
 
 	private void writeHeader(HuffNode root, BitOutputStream out) {
+		
+		if(root == null) {
+			return;
+		}
 		
 		if(root.myWeight == 0) {
 			 out.writeBits(1,0);
@@ -99,6 +103,10 @@ public class HuffProcessor {
 
 	private void codingHelper(HuffNode root, String path, String[] encodings) {
 		
+		if(root == null) {
+			return;
+		}
+		
 		if(root.myWeight==1) {
 			encodings[root.myValue] = path;
 			return;
@@ -118,11 +126,12 @@ public class HuffProcessor {
 			if(counts[x] > 0) {
 				pq.add(new HuffNode(x, counts[x], null, null));
 			}
+			//counts used as order in priority queue, smallest counts huff nodes removed first
 		}
-		while(pq.size() > 1) {
+		while(pq.size() > 1) { 
 			HuffNode left = pq.remove();
 			HuffNode right = pq.remove();
-			HuffNode t = new HuffNode(right.myValue + 1, left.myWeight+right.myWeight, left, right);
+			HuffNode t = new HuffNode(0, left.myWeight+right.myWeight, left, right);
 			pq.add(t);
 		}
 		HuffNode root = pq.remove();
@@ -169,7 +178,11 @@ public class HuffProcessor {
 	private void readCompressedBits(HuffNode root, BitInputStream in, BitOutputStream out) {
 		// stop reading when reach leaf that is PSEUDO _ EOF
 		HuffNode current = root;
+		
 		while(true) {
+			if(current == null) {
+				
+			}
 			int bits = in.readBits(1);
 			if(bits == -1) {
 				throw new HuffException("bad input, no PSEUDO_EOF");
