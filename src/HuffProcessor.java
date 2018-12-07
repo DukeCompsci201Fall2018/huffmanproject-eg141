@@ -63,6 +63,7 @@ public class HuffProcessor {
 	}
 	private void writeCompressedBits(String[] codings, BitInputStream in, BitOutputStream out) {
 		
+		//translation goes through in and turns to out, using codings, in 8-bit chunks (for one character)
 		//how to deal with PSEUDO_EOF
 		
 		for(int i = 0; i <codings.length; i++) {
