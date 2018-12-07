@@ -65,9 +65,14 @@ public class HuffProcessor {
 			String code = codings[x];
 			out.writeBits(code.length(), Integer.parseInt(code, 2));
 			in.readBits(BITS_PER_WORD);
-		}
+
+			}
 		
-	}
+		out.writeBits(codings[PSEUDO_EOF].length(), Integer.parseInt(codings[PSEUDO_EOF], 2));
+		}
+
+		
+
 
 	private void writeHeader(HuffNode root, BitOutputStream out) {
 		
