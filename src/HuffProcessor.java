@@ -64,14 +64,13 @@ public class HuffProcessor {
 		while(x != -1) {
 			String code = codings[x];
 			out.writeBits(code.length(), Integer.parseInt(code, 2));
-			in.readBits(BITS_PER_WORD);
+			x = in.readBits(BITS_PER_WORD);
 
 			}
 		
 		out.writeBits(codings[PSEUDO_EOF].length(), Integer.parseInt(codings[PSEUDO_EOF], 2));
 		}
 
-		
 
 
 	private void writeHeader(HuffNode root, BitOutputStream out) {
@@ -95,6 +94,7 @@ public class HuffProcessor {
 	}
 
 	private String[] makeCodingsFromTree(HuffNode root) {
+
 		String[]encodings = new String[ALPH_SIZE + 1];
 		codingHelper(root,"", encodings);
 		
@@ -107,7 +107,7 @@ public class HuffProcessor {
 			return;
 		}
 		
-		if(root.myWeight==1) {
+		if(root.myLeft == null && root.myRight == null) {
 			encodings[root.myValue] = path;
 			return;
 		}
@@ -206,7 +206,7 @@ public class HuffProcessor {
 
 	private HuffNode readTreeHeader(BitInputStream in) {
 		//taking formerly compressed stream of bits to create tree that represents bits
-		 
+		
 		int bit = in.readBits(1); // if can't read single bit will return -1
 		if(bit == -1) {
 			throw new HuffException("illegal input");
@@ -219,7 +219,7 @@ public class HuffProcessor {
 		}
 		else {
 			int value = in.readBits(BITS_PER_WORD + 1);
-			return new HuffNode(value, 0, null, null);
+			return new HuffNode(value, 1, null, null);
 		}
 	}
 }
