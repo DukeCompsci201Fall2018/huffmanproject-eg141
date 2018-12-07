@@ -79,7 +79,7 @@ public class HuffProcessor {
 			return;
 		}
 		
-		if(root.myWeight == 0) {
+		if(root.myLeft != null || root.myRight != null) {
 			 out.writeBits(1,0);
 			 writeHeader(root.myLeft, out);
 			 writeHeader(root.myRight, out);
